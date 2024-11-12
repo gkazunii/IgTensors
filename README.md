@@ -21,16 +21,34 @@ Information geometry allows probability distributions to be represented in a con
 
 # Tutorial
 
-### (θ,η)-representation
-Let's convert a 3x3x3 non-negative normalized tensor X into its θ and η representation.
+## (θ,η)-representation
+Let's convert a 3x3x3 non-negative normalized tensor P into its θ and η representation. θ and η are multi-dimensional arrays whose size is the same as P. 
 
-The transformation X ⇔ θ ⇔ η has one-to-one correspondence, and then it does not lose any information. We can always recover the original tensor X from θ or η representation. In the following, we assume all tensors normalized (i.e. $\sum_{ijkl} P_{ijkl}=1$) and non-negative.
+```julia
+using LinearAlgebra
+include("get_params.jl");
+
+P = normalize(rand(10,10,10),1);
+eta = get_eta_from_tensor(P);
+theta = get_theta_from_tensor(P);
+```
+θ and η are often called natural parameters and expectation parameters, respectively. The transformation X ⇔ θ ⇔ η has one-to-one correspondence, and then it does not lose any information. Although each element in `P` needs to be non-negative, the parameter `θ` can be any real value. However, $\theta_{111}$ has a role of normalization and is specified by all other $\theta$ values. If $i<l, j<m, k<n$ then, $\eta_{ijk} < \eta_{lmn}$ need to be satsifeid. 
+
+We can always recover the original tensor X from θ or η representation. 
+
+```julia
+P_from_eta   = get_tensor_from_theta(theta);
+P_from_theta = get_tensor_from_eta(eta);
+```
+
+Although each element in `P` needs to be non-negative, the parameter `θ` can be any real value except for $\theta_{1111}$.  
+In the following, we assume all tensors normalized (i.e. $\sum_{ijkl} P_{ijkl}=1$) and non-negative.
 
 ![ig_convert](https://github.com/user-attachments/assets/0ff6906b-0946-4d7c-9783-ce636cdde907)
 
 Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedings.mlr.press/v70/sugiyama17a/sugiyama17a.pdf) for the mathematical formula for transformation among X, θ, and η. 
 
-### Many-body approximation
+## Many-body approximation
 
 Many-body approximation reduces high-order interaction among tensor modes. Let us consider one-body, two-body, and three-body approximations of a given fourth-order tensor P. The $n$-body approximation of the tensor $P$ is represented as $P^{\leq n}$.
 
@@ -42,24 +60,45 @@ P_{ijkl} \simeq P_{ijkl}^{\leq 3} &= X_{ij}Y_{ik}Z_{il}U_{jk}V_{jl}W_{kl}
 \end{align}
 $$
 
-Each factorization can be described by a graph called interaction representation. Please refer to the original paper to see the relationship between tensor networks. 
+where the symbol $\simeq$ means approximation in terms of the KL divergence. Each factorization can be described by a graph called interaction representation. Please refer to the original paper to see the relationship between Interaction representation  and tensor networks. 
 
+The following commands perform $n$-body approximation of the given normalized random non-negative tensor `P`.
 ```Julia
-X = normalize(rand(10,10,10,10),1);
+P = normalize(rand(10,10,10,10),1);
 n = 3
-X_nbody, theta_nbody, eta_nbody = manybody_app(X, n, verbose=true);
+X_nbody, theta_nbody, eta_nbody = manybody_app(X_nbody, n, verbose=true);
 ```
 
-We obtain the projection destination in the tensor representation, θ-representation, and η-representation. 
+We obtain the projection destination from `P` onto the $n$-body manifold $\mathcal{B}_n$, which is a set of tensors that can be described in Equation. 
+in the tensor representation, θ-representation, and η-representation. We note that `X_nbody` is globally optimal tensor that minizis the objective function
+
+$$
+\begin{align}
+P = \arg\min_{Q \in \mathcal{B}} D_{KL}(P,Q)
+\end{align}
+$$
+
+We belive a great contribution comparing to the tradional low-rank approximation.
 
 If we include the hidden variables (mode) in the low-body tensor, the model will be a low-rank tensor, which forms non-convex optimisation problems, as shown in [this paper](https://arxiv.org/abs/2405.18220). 
 
-Links to 
-- [Python implementation by R. Kojima](https://github.com/kojima-r/pyLegendreDecomposition)
+We can customize the interaction using the list of binary vector `intracts`. In the following example, 
+the fast binary vector `[1,1,1,1]` means all one-body interactions are activated. `1` means activated, `0` means deactivated. Then, the second binary vector `[1,0,1,0,0,0]` means two-body interactions (i,j) and (i,k) are activated. Each value corresponds to two body interactions `[(i,j), (i,k), (i,l), (j,k), (j,l), (k,l)]`. The third 
 
-#### Example for COIL Dataset
+```julia
+# define intraction with all one-body interactions and
+# two-body interactions of (1,2) and (1,4) and
+# three-body interactions of (1,2,3).
+intracts = [ [1,1,1,1],[1,0,1,0,0,0],[1,0,0,0],[0] ];
+P, theta, eta = manybody_app(T, intracts)
+```
 
-### Legendre decomposition
+### Example for COIL Dataset
+
+![ig_coil](https://github.com/user-attachments/assets/a097a7d7-2965-452c-ab84-da99e938f28d)
+
+
+## Legendre decomposition
 
 Legendre decomposition is a generalization of many-body approximation. The binary tensor specifies which θ is to be fixed at 0. The size of this binary tensor is equal to the input tensor.
 
@@ -68,13 +107,21 @@ Links to
 - [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/Legendre-decomposition)
 - [Python implementation by Y. Kawakami](https://github.com/Yhkwkm/legendre-decomposition-python)
 
-### Legendre Tucker-rank decomposition
+## Legendre Tucker-rank decomposition
 
-### Tensor balancing
+## Tensor balancing
 
 Links to
 - [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/newton-balancing)
 - [Julia implementation](https://github.com/k-kitai/TensorBalancing.jl) 
+
+# Further readings
+
+A lot of work based on are devloping based on information
+
+- How to choose interaction automatically? by J. Enouen [[arXiv]](https://arxiv.org/pdf/2410.11964) 
+- Blind Source Separation via Legendre Transformation, by S. Luo [[Paper]](https://proceedings.mlr.press/v161/luo21a.html) [[Code]](https://github.com/sjmluo/IGLLM?utm_source=catalyzex.com) [[Slide]](https://github.com/sjmluo/IGLLM/blob/master/IGBSS_NeurIPS2020_Poster.pdf)
+- Relationship between many-body approximation and low-rank approximation by K. Ghalamkari [[arxiv]](https://arxiv.org/abs/2405.18220)
 
 # Baselines
 
@@ -93,6 +140,21 @@ This repository also provides the following tensor methods.
 - [HaLRTC](https://ieeexplore.ieee.org/document/6138863): High Accuracy Low Rank Tensor Completion
 - [SiLRTCTT](https://ieeexplore.ieee.org/abstract/document/7859390): Simple Low Rank Tensor Completion with Tensor Train
 - [TMacTT](https://ieeexplore.ieee.org/abstract/document/7859390): Tensor completion by parallel matrix factorization via tensor train
+
+# Links to other packages
+
+Many-body approximation
+- [Python implementation by R. Kojima](https://github.com/kojima-r/pyLegendreDecomposition)
+
+Legendre decomposition
+- [Python implementation by R. Kojima](https://github.com/kojima-r/pyLegendreDecomposition)
+- [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/Legendre-decomposition)
+- [Python implementation by Y. Kawakami](https://github.com/Yhkwkm/legendre-decomposition-python)
+
+Tensor balancing
+- [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/newton-balancing)
+- [Julia implementation](https://github.com/k-kitai/TensorBalancing.jl) 
+
 
 # Citation
 If you use this source code in a scientific publication, please consider citing the following papers:
