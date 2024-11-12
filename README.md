@@ -36,23 +36,45 @@ Many-body approximation reduces high-order interaction among tensor modes. Let u
 
 $$
 \begin{align}
-P_{ijkl} \simeq P_{ijkl}^{\leq 1} &= a_ib_jc_kd_l \\
-P_{ijkl} \simeq P_{ijkl}^{\leq 2} &= X_{ij}Y_{ik}Z_{il}U_{jk}V_{jl}W_{kl} \\
+P_{ijkl} \simeq P_{ijkl}^{\leq 1} &= p_i^{(1)}p_j^{(2)}p_k^{(3)}p_l^{(4)} \\
+P_{ijkl} \simeq P_{ijkl}^{\leq 2} &= X_{ij}^{(12)}X_{ik}^{(13)}X_{il}^{(14)}X_{jk}^{(23)}X_{kl}^{(34)} \\
 P_{ijkl} \simeq P_{ijkl}^{\leq 3} &= X_{ij}Y_{ik}Z_{il}U_{jk}V_{jl}W_{kl}
 \end{align}
 $$
 
-We define zero-body approximation P_{i_1}^{} as
+Each factorization can be described by a graph called interaction representation. Please refer to the original paper to see the relationship between tensor networks. 
 
-If we include the hidden variables (mode) in the low-body tensor, the model will be low-rank tensor, which form non-convex optimziation problems, as shown in [this paper](https://arxiv.org/abs/2405.18220). 
+```Julia
+X = normalize(rand(10,10,10,10),1);
+n = 3
+X_nbody, theta_nbody, eta_nbody = manybody_app(X, n, verbose=true);
+```
+
+We obtain the projection destination in the tensor representation, θ-representation, and η-representation. 
+
+If we include the hidden variables (mode) in the low-body tensor, the model will be a low-rank tensor, which forms non-convex optimisation problems, as shown in [this paper](https://arxiv.org/abs/2405.18220). 
+
+Links to 
+- [Python implementation by R. Kojima](https://github.com/kojima-r/pyLegendreDecomposition)
+
+#### Example for COIL Dataset
 
 ### Legendre decomposition
 
 Legendre decomposition is a generalization of many-body approximation. The binary tensor specifies which θ is to be fixed at 0. The size of this binary tensor is equal to the input tensor.
 
+Links to 
+- [Python implementation by R. Kojima](https://github.com/kojima-r/pyLegendreDecomposition)
+- [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/Legendre-decomposition)
+- [Python implementation by Y. Kawakami](https://github.com/Yhkwkm/legendre-decomposition-python)
+
 ### Legendre Tucker-rank decomposition
 
 ### Tensor balancing
+
+Links to
+- [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/newton-balancing)
+- [Julia implementation](https://github.com/k-kitai/TensorBalancing.jl) 
 
 # Baselines
 
