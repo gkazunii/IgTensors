@@ -48,15 +48,15 @@ In the following, we assume all tensors normalized (i.e. $\sum_{ijkl} P_{ijkl}=1
 
 Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedings.mlr.press/v70/sugiyama17a/sugiyama17a.pdf) for the mathematical formula for transformation among X, θ, and η. 
 
-## Many-body approximation
+## n-body approximation
 
-Many-body approximation reduces high-order interaction among tensor modes. Let us consider one-body, two-body, and three-body approximations of a given fourth-order tensor P. The $n$-body approximation of the tensor $P$ is represented as $P^{\leq n}$.
+Many-body approximation reduces high-order interaction among tensor modes. Let us consider one-body, two-body, and three-body approximations of a given fourth-order tensor $P$. The $n$-body approximation of the tensor $P$ is represented as $P^{\leq n}$ and they can be factorized as
 
 $$
 \begin{align}
 P_{ijkl} \simeq P_{ijkl}^{\leq 1} &= p_i^{(1)}p_j^{(2)}p_k^{(3)}p_l^{(4)} \\
 P_{ijkl} \simeq P_{ijkl}^{\leq 2} &= X_{ij}^{(12)}X_{ik}^{(13)}X_{il}^{(14)}X_{jk}^{(23)}X_{kl}^{(34)} \\
-P_{ijkl} \simeq P_{ijkl}^{\leq 3} &= X_{ij}Y_{ik}Z_{il}U_{jk}V_{jl}W_{kl}
+P_{ijkl} \simeq P_{ijkl}^{\leq 3} &= \chi_{ijk}^{(123)} \chi_{ijl}^{(124)} \chi_{ikl}^{(134)} \chi_{jkl}^{(234)}
 \end{align}
 $$
 
@@ -70,28 +70,35 @@ X_nbody, theta_nbody, eta_nbody = manybody_app(X_nbody, n, verbose=true);
 ```
 
 We obtain the projection destination from `P` onto the $n$-body manifold $\mathcal{B}_n$, which is a set of tensors that can be described in Equation. 
-in the tensor representation, θ-representation, and η-representation. We note that `X_nbody` is globally optimal tensor that minizis the objective function
+in the tensor representation, θ-representation, and η-representation. We note that `X_nbody` is a globally optimal tensor that minimizes the KL divergence from given tensor $P$, that is,
 
 $$
 \begin{align}
-P = \arg\min_{Q \in \mathcal{B}} D_{KL}(P,Q)
+P = \arg\min_{Q \in \mathcal{B}} D_{KL}(P,Q), 
 \end{align}
 $$
 
-We belive a great contribution comparing to the tradional low-rank approximation.
+which we believe a great contribution comparing to the traditional low-rank approximation forming non-convex optimization.
 
-If we include the hidden variables (mode) in the low-body tensor, the model will be a low-rank tensor, which forms non-convex optimisation problems, as shown in [this paper](https://arxiv.org/abs/2405.18220). 
+## many-body approximation
 
-We can customize the interaction using the list of binary vector `intracts`. In the following example, 
-the fast binary vector `[1,1,1,1]` means all one-body interactions are activated. `1` means activated, `0` means deactivated. Then, the second binary vector `[1,0,1,0,0,0]` means two-body interactions (i,j) and (i,k) are activated. Each value corresponds to two body interactions `[(i,j), (i,k), (i,l), (j,k), (j,l), (k,l)]`. The third 
+We can freely model the interaction using the list of $D$ binary vectors `intracts`, where $D$ is the number of orders of the input tensor. The number of elements in the $n$-th binary vector is the combination of $n$ items taken $D$ at a time. We support $D=4$ below. The following is an example of a many-body approach where the active interaction is specified by `intracts`.
 
 ```julia
-# define intraction with all one-body interactions and
+# define interaction with all one-body interactions and
 # two-body interactions of (1,2) and (1,4) and
 # three-body interactions of (1,2,3).
 intracts = [ [1,1,1,1],[1,0,1,0,0,0],[1,0,0,0],[0] ];
 P, theta, eta = manybody_app(T, intracts)
 ```
+
+The fast binary vector `[1,1,1,1]` means all one-body interactions are activated. `1` means activated, `0` means deactivated. Then, the second binary vector `[1,0,1,0,0,0]` means two-body interactions (i,j) and (i,k) are activated. Each value corresponds to two-body interactions `[(i,j), (i,k), (i,l), (j,k), (j,l), (k,l)]`. The third binary vector `[1,0,0,0]` means the third order interaction among (i,j,k) is activated. In the above selected interactions, the tensor $P$ will be factorized into the form of
+
+$$
+\begin{align}
+P_{ijkl} \simeq X_{ik}Y_{ijk}Z_l.
+\end{align}
+$$
 
 ### Example for COIL Dataset
 
