@@ -11,7 +11,6 @@ Our code works on Julia 1.8.
 
 # Why information geometry?
 
-
 Normalized nonnegative tensors have a natural correspondence with discrete probability distributions where the indices are discrete random variables and the index set is the sample space. Traditionally, tensor learning has been performed by projecting given tensor onto a model space (e.g., a set of low-rank tensors) in the coordinate system formed by each element of the tensor $(P_{111}, P_{211},...,P_{IJK})$. However, this projection is generally a nonconvex optimization problem.
 
 Information geometry allows probability distributions to be represented in a convenient dual-flat coordinate system, the θ and η coordinate systems. These coordinate systems make it simple to discuss how the model space should be defined to formulate learning as a convex optimization problem. 
@@ -51,7 +50,7 @@ Legendre decomposition is a generalization of many-body approximation. The binar
 This repository also provides the following tensor methods. 
 #### Factorizations
 - [CPAPR](https://epubs.siam.org/doi/abs/10.1137/110859063?casa_token=SSZGjzSrFL8AAAAA:OqRbePMSM1sTo6pV8vIsF4UhuKfu-zNfRDH7dIo8NTE8HQtlHaiYqqqcbpsxbe1VYxRbhNTTCbM): CP Alternating Poisson Regression 
-- [NNTF](https://link.springer.com/chapter/10.1007/978-3-030-41032-2_17): Non-negative Tensor Train Factorization
+- [NNTF](https://link.springer.com/chapter/10.1007/978-3-030-41032-2_17)  : Non-negative Tensor Train Factorization
 - [NTD](https://ieeexplore.ieee.org/abstract/document/4270403): Non-negative Tucker decomposition
 - [NTR](https://link.springer.com/article/10.1007/s11431-020-1820-x): Non-negative Tensor Ring Decomposition
 - [TR](https://arxiv.org/abs/1606.05535): Tensor Ring Decomposition based on SVD
@@ -62,7 +61,7 @@ This repository also provides the following tensor methods.
 - [SiLRTC](https://ieeexplore.ieee.org/document/6138863): Simple Low Rank Tensor Completion
 - [HaLRTC](https://ieeexplore.ieee.org/document/6138863): High Accuracy Low Rank Tensor Completion
 - [SiLRTCTT](https://ieeexplore.ieee.org/abstract/document/7859390): Simple Low Rank Tensor Completion with Tensor Train
-- [TMacTT]((https://ieeexplore.ieee.org/abstract/document/7859390)): Tensor completion by parallel matrix factorization via tensor train
+- [TMacTT](https://ieeexplore.ieee.org/abstract/document/7859390): Tensor completion by parallel matrix factorization via tensor train
 
 # Citation
-If you use this source-code in a scientific publication, please consider cite following papers:
+If you use this source code in a scientific publication, please consider citing the following papers:
