@@ -15,6 +15,9 @@ Normalized nonnegative tensors have a natural correspondence with discrete proba
 
 Information geometry allows probability distributions to be represented in a convenient dual-flat coordinate system, the θ and η coordinate systems. These coordinate systems make it simple to discuss how the model space should be defined to formulate learning as a convex optimization problem. 
 
+![ig_fig](https://github.com/user-attachments/assets/71e06933-25ad-4916-bf2d-0a22fbc20282)
+
+
 
 # Tutorial
 
@@ -23,9 +26,13 @@ Let's convert a 3x3x3 non-negative normalized tensor X into its θ and η repres
 
 The transformation X ⇔ θ ⇔ η has one-to-one correspondence, and then it does not lose any information. We can always recover the original tensor X from θ or η representation. In the following, we assume all tensors normalized (i.e. $\sum_{ijkl} P_{ijkl}=1$) and non-negative.
 
+![ig_convert](https://github.com/user-attachments/assets/0ff6906b-0946-4d7c-9783-ce636cdde907)
+
+Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedings.mlr.press/v70/sugiyama17a/sugiyama17a.pdf) for the mathematical formula for transformation among X, θ, and η. 
+
 ### Many-body approximation
 
-Many-body approximation reduces high-order interaction among tensor modes. As an example, let us consider a 3x3x3x3 tensor P. 
+Many-body approximation reduces high-order interaction among tensor modes. Let us consider one-body, two-body, and three-body approximations of a given fourth-order tensor P. The $n$-body approximation of the tensor $P$ is represented as $P^{\leq n}$.
 
 $$
 \begin{align}
@@ -34,6 +41,8 @@ P_{ijkl} \simeq P_{ijkl}^{\leq 2} &= X_{ij}Y_{ik}Z_{il}U_{jk}V_{jl}W_{kl} \\
 P_{ijkl} \simeq P_{ijkl}^{\leq 3} &= X_{ij}Y_{ik}Z_{il}U_{jk}V_{jl}W_{kl}
 \end{align}
 $$
+
+We define zero-body approximation P_{i_1}^{} as
 
 If we include the hidden variables (mode) in the low-body tensor, the model will be low-rank tensor, which form non-convex optimziation problems, as shown in [this paper](https://arxiv.org/abs/2405.18220). 
 
