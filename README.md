@@ -98,6 +98,8 @@ P, theta, eta = manybody_app(T, intracts)
 ![ig_coil](https://github.com/user-attachments/assets/a097a7d7-2965-452c-ab84-da99e938f28d)
 
 
+### Low-body tensor completion
+
 ## Legendre decomposition
 
 Legendre decomposition is a generalization of many-body approximation. The binary tensor specifies which θ is to be fixed at 0. The size of this binary tensor is equal to the input tensor.
