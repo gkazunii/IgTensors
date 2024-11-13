@@ -69,8 +69,7 @@ n = 3
 X_nbody, theta_nbody, eta_nbody = manybody_app(X_nbody, n, verbose=true);
 ```
 
-We obtain the projection destination from `P` onto the $n$-body manifold $\mathcal{B}_n$, which is a set of tensors that can be described in Equation. 
-in the tensor representation, θ-representation, and η-representation. We note that `X_nbody` is a globally optimal tensor that minimizes the KL divergence from given tensor $P$, that is,
+We obtain the projection destination from `P` onto the $n$-body manifold $\mathcal{B}_n$, which is a set of tensors that can be described in Equation. The obtained tensor `X_nbody` is a globally optimal tensor that minimizes the KL divergence from given tensor $P$, that is,
 
 $$
 \begin{align}
@@ -79,6 +78,17 @@ P = \arg\min_{Q \in \mathcal{B}} D_{KL}(P,Q),
 $$
 
 which we believe a great contribution comparing to the traditional low-rank approximation forming non-convex optimization.
+
+We also note that it always holds that 
+
+$$
+\begin{align}
+D(P,P^{\leq n+1}) \leq D(P,P^{\leq n})
+\end{align}
+$$
+
+because of the relation $\mathcal{B}\_{n+1} \subset \mathcal{B}\_{n}$.
+
 
 ## many-body approximation
 
