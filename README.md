@@ -107,6 +107,9 @@ $$
 
 ### Low-body tensor completion
 
+Based on many-body approximation and $em$-algorithm, we can estimate the missing values in a given tensor $P$. Let B be the model manifold and define the data manifold $\mathcal{D} ≡ \{ P \mid P_\Omega = T_\Omega \}$. The $em$ algorithm optimizes the KL divergence between two manifolds $B$ and $D$. When we define the model manifold B by low-rank tensors, the manifold B is not flat, and then, each projection onto B will be non-convex. On the other hand, when we form the model manifold B by low-body tensors or interaction-reduced tensors, it will be flat, and each projection onto B will be convex. We note that we still have initial value dependency. 
+
+
 ## Legendre decomposition
 
 Legendre decomposition is a generalization of many-body approximation. The binary tensor specifies which θ is to be fixed at 0. The size of this binary tensor is equal to the input tensor.
