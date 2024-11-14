@@ -68,6 +68,8 @@ $$
 
 where the symbol $\simeq$ means approximation in terms of the KL divergence. For $d,m,p = \{1,2,3,4\}$, each factor $p^{(d)}$, $X^{(dm)}$, and $\chi^{(dmp)}$ is called interaction. For example, the vecotr $p^{k}$ is one-body interaction about $k$-th mode, the matrix $X^{(dk)}$ is two-body interaction between $d$-th and $k$-th mode, and the tensor $\chi^{(dmp)}$ is three-body interaction among $d$-th, $k$-th and $m$-th modes. Each factorization can be described by a graph called interaction representation. Please refer to the original paper to see the relationship between Interaction representation and tensor networks. The one-body approximaion is quilavent with rank-1 approximation optimizing KL diveregence. That is, we can say ${\rm rank}(P^{\leq 1})=1$. However, $n(\geq 2)$-body tensor is not low-rank tensor. 
 
+![ig_1b2b3b](https://github.com/user-attachments/assets/085cd07b-84ef-41ef-ab62-5a9fb8491d29)
+
 The following commands perform $n$-body approximation of the given normalized random non-negative tensor `P`.
 ```Julia
 P = normalize(rand(10,10,10,10),1);
@@ -170,6 +172,7 @@ This libary based on Naturla gradient method, which is a Newton method for non-E
 
 A lot of work based on are devloping based on information
 
+- Convex Manifold Approximation for Tensors [[Theis]](https://ir.soken.ac.jp/records/6661)
 - How to choose interaction automatically? by J. Enouen [[arXiv]](https://arxiv.org/pdf/2410.11964) 
 - Blind Source Separation via Legendre Transformation, by S. Luo [[Paper]](https://proceedings.mlr.press/v161/luo21a.html) [[Code]](https://github.com/sjmluo/IGLLM?utm_source=catalyzex.com) [[Slide]](https://github.com/sjmluo/IGLLM/blob/master/IGBSS_NeurIPS2020_Poster.pdf)
 - Relationship between many-body approximation and low-rank approximation by K. Ghalamkari [[arxiv]](https://arxiv.org/abs/2405.18220)
