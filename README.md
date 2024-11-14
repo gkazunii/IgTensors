@@ -48,6 +48,12 @@ In the following, we assume all tensors normalized (i.e. $\sum_{ijkl} P_{ijkl}=1
 
 Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedings.mlr.press/v70/sugiyama17a/sugiyama17a.pdf) for the mathematical formula for transformation among X, θ, and η. 
 
+### θ representation and tensor rank
+
+If all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0, the tensor is rank-1 tensor. Also, if the tensor is rank-1, then all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0.
+
+### η representation and stochastic tensors
+
 ## n-body approximation
 
 Many-body approximation reduces high-order interaction among tensor modes. Let us consider one-body, two-body, and three-body approximations of a given fourth-order tensor $P$. The $n$-body approximation of the tensor $P$ is represented as $P^{\leq n}$ and they can be factorized as
@@ -60,7 +66,7 @@ P_{ijkl} \simeq P_{ijkl}^{\leq 3} &= \chi_{ijk}^{(123)} \chi_{ijl}^{(124)} \chi_
 \end{align}
 $$
 
-where the symbol $\simeq$ means approximation in terms of the KL divergence. Each factorization can be described by a graph called interaction representation. Please refer to the original paper to see the relationship between Interaction representation  and tensor networks. 
+where the symbol $\simeq$ means approximation in terms of the KL divergence. For $d,m,p = \{1,2,3,4\}$, each factor $p^{(d)}$, $X^{(dm)}$, and $\chi^{(dmp)}$ is called interaction. For example, the vecotr $p^{k}$ is one-body interaction about $k$-th mode, the matrix $X^{(dk)}$ is two-body interaction between $d$-th and $k$-th mode, and the tensor $\chi^{(dmp)}$ is three-body interaction among $d$-th, $k$-th and $m$-th modes. Each factorization can be described by a graph called interaction representation. Please refer to the original paper to see the relationship between Interaction representation and tensor networks. The one-body approximaion is quilavent with rank-1 approximation optimizing KL diveregence. That is, we can say ${\rm rank}(P^{\leq 1})=1$. However, $n(\geq 2)$-body tensor is not low-rank tensor. 
 
 The following commands perform $n$-body approximation of the given normalized random non-negative tensor `P`.
 ```Julia
@@ -77,7 +83,7 @@ P = \arg\min_{Q \in \mathcal{B}} D_{KL}(P,Q),
 \end{align}
 $$
 
-which we believe a great contribution comparing to the traditional low-rank approximation forming non-convex optimization.
+which we believe a good contribution to the tensor community comparing to the traditional low-rank approximation forming non-convex optimization.
 
 We also note that it always holds that 
 
@@ -87,8 +93,15 @@ D(P,P^{\leq n+1}) \leq D(P,P^{\leq n})
 \end{align}
 $$
 
-because of the relation $\mathcal{B}\_{n+1} \subset \mathcal{B}\_{n}$.
+because of the relation $\mathcal{B}\_{n+1} \subset \mathcal{B}\_{n}$. Let us see the θ-represetnation after one-body approximation. 
 
+```Julia
+P = normalize(rand(3,3,3),1);
+n = 1
+P_1body, theta_1body, eta_1body = manybody_app(P, n, verbose=true);
+theta_1body
+```
+We can see that a lot of value in $\theta$ is 0. Tensor many-body approximation is performed by reducing some element in θ to be 0. 
 
 ## many-body approximation
 
@@ -124,18 +137,34 @@ Based on many-body approximation and $em$-algorithm, we can estimate the missing
 
 Legendre decomposition is a generalization of many-body approximation. The binary tensor specifies which θ is to be fixed at 0. The size of this binary tensor is equal to the input tensor.
 
-Links to 
-- [Python implementation by R. Kojima](https://github.com/kojima-r/pyLegendreDecomposition)
-- [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/Legendre-decomposition)
-- [Python implementation by Y. Kawakami](https://github.com/Yhkwkm/legendre-decomposition-python)
 
 ## Legendre Tucker-rank decomposition
 
 ## Tensor balancing
 
-Links to
-- [C++ implementation by M. Sugiyama](https://github.com/mahito-sugiyama/newton-balancing)
-- [Julia implementation](https://github.com/k-kitai/TensorBalancing.jl) 
+related to optimal transoport.
+
+```julia
+T = normalize(rand(3,3,3),1);
+Ts, _ = fiber_balancing(T);
+sum(Ts,dims=1)[1,:,:]
+[[0.11 0.11 0.11]
+ [0.11 0.11 0.11]
+ [0.11 0.11 0.11]]
+sum(Ts,dims=2)[:,1,:]
+[[0.11 0.11 0.11]
+ [0.11 0.11 0.11]
+ [0.11 0.11 0.11]]
+sum(Ts,dims=3)[:,:,1]
+[[0.11 0.11 0.11]
+ [0.11 0.11 0.11]
+ [0.11 0.11 0.11]]
+```
+
+
+# Complelixty
+
+This libary based on Naturla gradient method, which is a Newton method for non-Euclidian space. Hence, the complixty is cubic for the number of parameters to be optimized, which is not scalable and we admit our current version is not super convinent in the big-data age. We hope you will develop super scalable version of our framework in future.
 
 # Further readings
 
@@ -144,6 +173,7 @@ A lot of work based on are devloping based on information
 - How to choose interaction automatically? by J. Enouen [[arXiv]](https://arxiv.org/pdf/2410.11964) 
 - Blind Source Separation via Legendre Transformation, by S. Luo [[Paper]](https://proceedings.mlr.press/v161/luo21a.html) [[Code]](https://github.com/sjmluo/IGLLM?utm_source=catalyzex.com) [[Slide]](https://github.com/sjmluo/IGLLM/blob/master/IGBSS_NeurIPS2020_Poster.pdf)
 - Relationship between many-body approximation and low-rank approximation by K. Ghalamkari [[arxiv]](https://arxiv.org/abs/2405.18220)
+- Coordinate Descent Method for Log-linear Model on Posets, by Hayashi, S., Sugiyama, M., & Matsushima, S. [[Paper]](https://ieeexplore.ieee.org/abstract/document/9260027)
 
 # Baselines
 
