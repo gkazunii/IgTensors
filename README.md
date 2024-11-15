@@ -213,3 +213,6 @@ Tensor balancing
 
 # Citation
 If you use this source code in a scientific publication, please consider citing the following papers:
+
+# Acknowledgement
+This work was supported by RIKEN, Special Postdoctoral Researcher Program.
