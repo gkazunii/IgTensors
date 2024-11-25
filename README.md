@@ -54,6 +54,20 @@ If all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0, the te
 
 ### η representation and stochastic tensors
 
+For a given normalized non-negative tensor $P$, its expectation parameter η is defined as 
+
+$$
+\begin{align}
+\eta_{ijk} = \sum_{i'=1} \sum_{j'=1} \sum_{k'=1} P_{i'j'k'} 
+\end{align}
+$$
+
+Thus, by constraining parameters η, we can control the slice sum and/or fiber sum of the tensor. As a easiest example for a matrix, if $\eta_{i1}=\eta_{1i}=(n-i+1)/n$, the corresponding matrix P is a double stochastic matrix, that is, it holds that $\sum_i P_{i1} = \sum_i P_{1i} = 1/n$. 
+
+### m-projection and e-projection
+
+Let us consider a tensor set whose natural parameter has a liner condition. Such a set of tensor has a flatness called e-flat.
+
 ## n-body approximation
 
 Many-body approximation reduces high-order interaction among tensor modes. Let us consider one-body, two-body, and three-body approximations of a given fourth-order tensor $P$. The $n$-body approximation of the tensor $P$ is represented as $P^{\leq n}$ and they can be factorized as
@@ -144,8 +158,9 @@ Legendre decomposition is a generalization of many-body approximation. The binar
 
 ## Tensor balancing
 
-related to optimal transoport.
+We project a given tensor P to a manifold whose eta-parameter is constrained and then obtain a balanced tensor. If the tensor P is a matrix, this optimization is closely related to optimal transport. This library provides two functions `fiber_balancing` and `slice_balaincing`.
 
+Without any option, `fiber_balaincing` provides 
 ```julia
 T = normalize(rand(3,3,3),1);
 Ts, _ = fiber_balancing(T);
@@ -163,6 +178,7 @@ sum(Ts,dims=3)[:,:,1]
  [0.11 0.11 0.11]]
 ```
 
+The obtained tensor Ts minimizes the inversed KL divergence from the given tensor onto tensor set
 
 # Complelixty
 
