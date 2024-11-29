@@ -3,7 +3,6 @@
 
 This is a julia package for non-negative tensor methods based on information goemetry, which supports following papers:
 - Many-body approximation for non-negative tensors [[Paper]](https://neurips.cc/virtual/2023/poster/72780) [[Poster]](https://nips.cc/media/PosterPDFs/NeurIPS%202023/72780.png?t=1698249769.865172) [[Slide]]()
-- Low-body tensor completion [[Paper]](https://neurips.cc/virtual/2023/poster/72780)
 - Legendre decomposition [[Paper]](https://papers.nips.cc/paper_files/paper/2018/hash/56a3107cad6611c8337ee36d178ca129-Abstract.html) [[Poster]](https://mahito.nii.ac.jp/2ba8ffb6f7afa5b021d6c57555b16f04/Sugiyama_NeurIPS2018_poster.pdf) [[Slide]](https://mahito.nii.ac.jp/60230e98c12af12f4dacb0dab21e5ec9/Sugiyama_NeurIPS2018_slide.pdf)
 - Tensor balancing [[Paper]](https://papers.nips.cc/paper_files/paper/2018/hash/56a3107cad6611c8337ee36d178ca129-Abstract.html) [[Poster]](https://mahito.nii.ac.jp/c8b7b54d22b622cc389d16dba5a96543/Sugiyama_ICML2017_poster.pdf) [[Slide]](https://mahito.nii.ac.jp/3917bf4c2ee058ed7e8816a86d8c1047/Sugiyama_ICML2017_slide.pdf)
 
@@ -24,6 +23,18 @@ Information geometry allows probability distributions to be represented in a con
 
 # Tutorial
 
+## Getting start
+
+1. Install Julia (>1.8) and the following packages:
+```
+\] StaticArrays, IterTools, Combinatorics, Quadmath, DoubleFloats, Distributions
+```
+2. Clone this repository
+```
+git clone https://github.com/gkazunii/IgTensors.git
+```
+3. Enjoy!
+
 ## (θ,η)-representation
 Let's convert a 3x3x3 non-negative normalized tensor P into its θ and η representation. θ and η are multi-dimensional arrays whose size is the same as P. 
 
@@ -36,31 +47,31 @@ P = normalize(rand(10,10,10),1);
 eta = get_eta_from_tensor(P);
 theta = get_theta_from_tensor(P);
 ```
-θ and η are often called natural parameters and expectation parameters, respectively. The transformation X ⇔ θ ⇔ η has one-to-one correspondence, and then it does not lose any information. Although each element in `P` needs to be non-negative, the parameter `θ` can be any real value. However, $\theta_{111}$ has a role of normalization and is specified by all other $\theta$ values. If $i<l, j<m, k<n$ then, $\eta_{ijk} < \eta_{lmn}$ need to be satsifeid. 
+θ and η are often called natural parameters and expectation parameters, respectively. The transformation P ⇔ θ ⇔ η has one-to-one correspondence, and then it does not lose any information. Although each element in `P` needs to be non-negative, the parameter `θ` can be any real value. However, $\theta_{111}$ has a role of normalization and is specified by all other $\theta$ values. If $i<l, j<m, k<n$ then, $\eta_{ijk} < \eta_{lmn}$ need to be satsifeid. 
 
-We can always recover the original tensor X from θ or η representation. 
+We can always recover the original tensor P from θ or η representation. 
 
 ```julia
 P_from_eta   = get_tensor_from_theta(theta);
 P_from_theta = get_tensor_from_eta(eta);
 ```
 
-Although each element in `P` needs to be non-negative, the parameter `θ` can be any real value except for $\theta_{1111}$.  
-In the following, we assume all tensors normalized (i.e. $\sum_{ijkl} P_{ijkl}=1$) and non-negative.
+Although each element in P needs to be non-negative, the parameter θ can be any real value except for $\theta_{1111}$.  
+In the following, we assume all tensors normalized (i.e. $\sum_{ijkl} P_{ijkl}=1$) and non-negative. We denote θ(P) and η(P) are natural parameters and expectation parameters of the tensor P.
 
 ![ig_convert](https://github.com/user-attachments/assets/0ff6906b-0946-4d7c-9783-ce636cdde907)
 
-Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedings.mlr.press/v70/sugiyama17a/sugiyama17a.pdf) for the mathematical formula for transformation among X, θ, and η. 
+Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedings.mlr.press/v70/sugiyama17a/sugiyama17a.pdf) for the mathematical formula for transformation among P, θ, and η. 
 
 ### θ representation and tensor rank
 
 If all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0, the tensor is rank-1 tensor. Also, if the tensor is rank-1, then all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0. Thus, we can write the set of (non-negative normalized) rank-1 tensors as 
 
 $$
-B = \set{ P \mid \theta(P)\_{ijk} = 0 \ \ \text{if} \ \ ij \geq 2 \ \ \text{and} \ \ ik \geq 2 \ \ \text{and} \ \ jk \geq 2 }
+B_1 = \set{ P \mid \theta(P)\_{ijk} = 0 \ \ \text{if} \ \ ij \geq 2 \ \ \text{and} \ \ ik \geq 2 \ \ \text{and} \ \ jk \geq 2 }
 $$
 
-Let us see that the expeactaion parameters of rank-1 tensor satisifs the above condition.
+Let us see that the random natural parameters of the rank-1 tensor satisfy the above condition.
 
 ```julia
 # Generate random rank-1 tensor
@@ -89,21 +100,21 @@ julia> theta = get_theta_from_tensor(P);
 
 ### η representation and stochastic tensors
 
-For a given normalized non-negative tensor $P$, its expectation parameter η is defined as 
+For a $I \times J \times K$ normalized non-negative tensor $P$, its expectation parameter η is defined as 
 
 $$
 \begin{align}
-\eta_{ijk} = \sum_{i'=1} \sum_{j'=1} \sum_{k'=1} P_{i'j'k'} 
+\eta_{ijk} = \sum_{i'=1}^I \sum_{j'=1}^J \sum_{k'=1}^K P_{i'j'k'} 
 \end{align}
 $$
 
-Thus, by constraining parameters η, we can control the slice sum and/or fiber sum of the tensor. Let us see the matrix case, two-dimentional matrix, as a easiete example. We call a matrix is a balanced matrix if all column sums are 1/I and row sum are 1/J where the matrix size is $I \times J$. The set of double stochastic matrices can be written as follows:
+Thus, by constraining parameters η, we can control the slice sum and/or fiber sum of the tensor. Let us see the matrix case, a two-dimensional matrix, as the easiest example. We say a matrix is balanced if all column sums are 1/I and row sums are 1/J where the matrix size is $I \times J$. The set of double stochastic matrices can be written as follows:
 
 $$
 H = \set{ P \mid \eta(P)\_{i1} = \frac{n-i+1}{n}, \ \ \eta(P)\_{1j} = \frac{n-j+1}{n} }
 $$
 
-Indeed, let us convert a double stochastic matrix $P$ into its expectation parameter. Then, we can see the obtained $\eta$ satisfy the above condition. 
+Let us convert a double stochastic matrix $P$ into its expectation parameter. Indeed, we can see the obtained $\eta$ satisfy the above condition. 
 
 ```julia
 # Generate normalized double stochastic matrix 
@@ -122,7 +133,10 @@ julia> get_eta_from_tensor(mat)
 
 ### m-projection and e-projection
 
-Let us consider a tensor set whose natural parameter has a liner condition. Such a set of tensor has a flatness called e-flat.
+Let us consider a subspace in the space of non-negative normalized tensors. If the subspace is constrained by linear conditions on θ, it is called an e-flat manifold. If the subspace is bounded by linear conditions on η, it is called an m-flat manifold. For example, the subspace $B_1$ is an e-flat manifold, and $H$ is an m-flat manifold. 
+
+The projection that optimizes the KL divergence from a given tensor to an m-flat subspace is always a convex optimization problem.
+In the following, we disucss many-body approximation and tensor factorzation. The flatness of the solution space makes them convex optimization problem, which has no initial value dependency. 
 
 ## n-body approximation
 
@@ -225,22 +239,50 @@ Based on many-body approximation and $em$-algorithm, we can estimate the missing
 
 Legendre decomposition is a generalization of many-body approximation. The binary tensor specifies which θ is to be fixed at 0. The size of this binary tensor is equal to the input tensor.
 
+```julia
+# Get normalized non-negative tensor
+julia> P = normalize(rand(3,3,2), 1);
+# Define a matrix
+# Note: W[1,1,1] should be 1.
+julia> W = [ 1 0 0 ; 1 1 1; 0 0 1;;; 0 0 1; 1 0 0; 0 1 0 ]
+3×3×2 Array{Int64, 3}:
+[:, :, 1] =
+ 1  0  0
+ 1  1  1
+ 0  0  1
+
+[:, :, 2] =
+ 0  0  1
+ 1  0  0
+ 0  1  0
+
+julia> P, theta, eta = legendre_decomp(P, pos_theta, verbose=true);
+julia> theta
+3×3×2 Array{Float64, 3}:
+[:, :, 1] =
+  0.0       0.0        0.0
+ -0.280226  0.508354  -1.09232
+  0.0       0.0        0.999802
+
+[:, :, 2] =
+  0.0      0.0       0.151623
+ -0.98229  0.0       0.0
+  0.0      0.618302  0.0
+```
 
 ## Legendre Tucker-rank decomposition
 
+
 ## Tensor balancing
 
-We refer to balanced tensors as tensors whose slice/fiber sum is allinged. We project a given tensor P to a manifold $H$, which is the set of balanced tensors. 
-
-
-
-whose eta-parameter is constrained and then obtain a balanced tensor. If the tensor P is a matrix, this optimization is closely related to optimal transport. This library provides two functions `fiber_balancing` and `slice_balaincing`.
+We refer to balanced tensors as tensors whose slice/fiber sum is allinged. We project a given tensor P to a manifold $H$, which is the set of balanced tensors. This library provides two functions `fiber_balancing` and `slice_balaincing`. If the tensor P is a matrix, this optimization is closely related to optimal transport. 
 
 Without any option, `fiber_balaincing` and `slice_balancing` assume each fiber/slice sum is 1. 
 ```julia
-julia> T = normalize(rand(3,3,3),1);
+julia> include("balancing.jl")
+julia> P = normalize(rand(3,3,3),1);
 # Fiber balancing
-julia> Ts, _ = fiber_balancing(T);
+julia> R, _, _ = fiber_balancing(T);
 julia> sum(Ts,dims=1)[1,:,:]
 [[0.11 0.11 0.11]
  [0.11 0.11 0.11]
@@ -255,7 +297,7 @@ julia> sum(Ts,dims=3)[:,:,1]
  [0.11 0.11 0.11]]
 
 # Slice balancing
-julia> Ts, _ = slice_balancing(T);
+julia> R, _, _ = slice_balancing(T);
 julia> sum(Ts,dims=[2,3])[:]
 # [0.33 0.33 0.33]
 julia> sum(Ts,dims=[1,3])[:]
@@ -264,12 +306,11 @@ julia> sum(Ts,dims=[1,2])[:]
 # [0.33 0.33 0.33]
 ```
 
-The obtained tensor Ts minimizes the inversed KL divergence from the given tensor onto tensor set
-The obtained tensor `X_nbody` is a globally optimal tensor that minimizes the KL divergence from given tensor $P$, that is,
+The obtained tensor R minimizes the inversed KL divergence from the given tensor onto fiber/slice balanced tensor space $H$, that is,
 
 $$
 \begin{align}
-P^{\leq n} = \arg\min_{Q \in \mathcal{H}} D_{KL}(Q,P), 
+R = \arg\min_{Q \in \mathcal{H}} D_{KL}(Q,P), 
 \end{align}
 $$
 
