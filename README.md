@@ -226,6 +226,7 @@ P_{ijkl} \simeq X_{ik}Y_{ijk}Z_l.
 $$
 
 ### Example for COIL Dataset
+We extracted 10 color images from the Columbia Object Image Library (COIL-100) and constructed $40 \times 40 \times 3 \times 10$ tensor P, where each mode represents the width, height, color, or image index, respectively, then, we factorized the tensor P by many-body approximation. If we use higher-order interaction, images are well reconstructed. If we deactivete interaction among (w,h,c), the reconstruvtion becomes monotone image since the color (c) is independent in the pixcel position (w,h) in each reconsturcted image. Plese refer to Section 3.1. in this paper more disucstion. 
 
 ![ig_coil](https://github.com/user-attachments/assets/a097a7d7-2965-452c-ab84-da99e938f28d)
 
