@@ -7,7 +7,10 @@ This is a julia package for non-negative tensor methods based on information goe
 - Legendre decomposition [[Paper]](https://papers.nips.cc/paper_files/paper/2018/hash/56a3107cad6611c8337ee36d178ca129-Abstract.html) [[Poster]](https://mahito.nii.ac.jp/2ba8ffb6f7afa5b021d6c57555b16f04/Sugiyama_NeurIPS2018_poster.pdf) [[Slide]](https://mahito.nii.ac.jp/60230e98c12af12f4dacb0dab21e5ec9/Sugiyama_NeurIPS2018_slide.pdf)
 - Tensor balancing [[Paper]](https://papers.nips.cc/paper_files/paper/2018/hash/56a3107cad6611c8337ee36d178ca129-Abstract.html) [[Poster]](https://mahito.nii.ac.jp/c8b7b54d22b622cc389d16dba5a96543/Sugiyama_ICML2017_poster.pdf) [[Slide]](https://mahito.nii.ac.jp/3917bf4c2ee058ed7e8816a86d8c1047/Sugiyama_ICML2017_slide.pdf)
 
-Our code works on Julia 1.8. 
+Our code works on Julia 1.8. Required packages:
+```
+StaticArrays, IterTools, Combinatorics, Quadmath, DoubleFloats, Distributions
+```
 
 # Why information geometry?
 
@@ -26,6 +29,7 @@ Let's convert a 3x3x3 non-negative normalized tensor P into its θ and η repres
 
 ```julia
 using LinearAlgebra
+using TensorToolbox
 include("get_params.jl");
 
 P = normalize(rand(10,10,10),1);
@@ -50,7 +54,38 @@ Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedi
 
 ### θ representation and tensor rank
 
-If all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0, the tensor is rank-1 tensor. Also, if the tensor is rank-1, then all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0.
+If all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0, the tensor is rank-1 tensor. Also, if the tensor is rank-1, then all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0. Thus, we can write the set of (non-negative normalized) rank-1 tensors as 
+
+$$
+B = \set{ P \mid \theta(P)\_{ijk} = 0 \ \ \text{if} \ \ ij \geq 2 \ \ \text{and} \ \ ik \geq 2 \ \ \text{and} \ \ jk \geq 2 }
+$$
+
+Let us see that the expeactaion parameters of rank-1 tensor satisifs the above condition.
+
+```julia
+# Generate random rank-1 tensor
+julia> P = reshape(kron(rand(3), rand(3), rand(3)), (3,3,3));
+julia> mrank(P)
+(1,1,1)
+
+# Check its natural parameters
+julia> theta = get_theta_from_tensor(P);
+3×3×3 Array{Float64, 3}:
+ [:, :, 1] =
+ -1.12588    0.303789      0.0151992
+ -0.922182  -2.22045e-16  -1.11022e-16
+ -0.123221   2.22045e-16   0.0
+
+ [:, :, 2] =
+  0.278747     -1.11022e-16  -1.11022e-16
+ -3.33067e-16   3.33067e-16   1.11022e-16
+  2.22045e-16  -2.22045e-16   0.0
+
+ [:, :, 3] =
+ -1.86752       3.33067e-16  -2.22045e-16
+  1.11022e-16  -1.11022e-16   0.0
+  2.22045e-16  -4.44089e-16   4.44089e-16
+```
 
 ### η representation and stochastic tensors
 
@@ -62,7 +97,28 @@ $$
 \end{align}
 $$
 
-Thus, by constraining parameters η, we can control the slice sum and/or fiber sum of the tensor. As a easiest example for a matrix, if $\eta_{i1}=\eta_{1i}=(n-i+1)/n$, the corresponding matrix P is a double stochastic matrix, that is, it holds that $\sum_i P_{i1} = \sum_i P_{1i} = 1/n$. 
+Thus, by constraining parameters η, we can control the slice sum and/or fiber sum of the tensor. Let us see the matrix case, two-dimentional matrix, as a easiete example. We call a matrix is a balanced matrix if all column sums are 1/I and row sum are 1/J where the matrix size is $I \times J$. The set of double stochastic matrices can be written as follows:
+
+$$
+H = \set{ P \mid \eta(P)\_{i1} = \frac{n-i+1}{n}, \ \ \eta(P)\_{1j} = \frac{n-j+1}{n} }
+$$
+
+Indeed, let us convert a double stochastic matrix $P$ into its expectation parameter. Then, we can see the obtained $\eta$ satisfy the above condition. 
+
+```julia
+# Generate normalized double stochastic matrix 
+julia> mat = [0.1 0.6 0.3;
+       0.6 0.2 0.2;
+       0.3 0.2 0.5]
+
+julia> mat = mat ./ sum(mat)
+
+julia> get_eta_from_tensor(mat)
+3×3 Matrix{Float64}:
+ 1.0       0.666667  0.333333
+ 0.666667  0.366667  0.233333
+ 0.333333  0.233333  0.166667
+```
 
 ### m-projection and e-projection
 
@@ -86,6 +142,7 @@ where the symbol $\simeq$ means approximation in terms of the KL divergence. For
 
 The following commands perform $n$-body approximation of the given normalized random non-negative tensor `P`.
 ```Julia
+include("decomp.jl")
 P = normalize(rand(10,10,10,10),1);
 n = 3
 X_nbody, theta_nbody, eta_nbody = manybody_app(X_nbody, n, verbose=true);
@@ -95,7 +152,7 @@ We obtain the projection destination from `P` onto the $n$-body manifold $\mathc
 
 $$
 \begin{align}
-P = \arg\min_{Q \in \mathcal{B}} D_{KL}(P,Q), 
+P^{\leq n} = \arg\min_{Q \in \mathcal{B}\_{n}} D_{KL}(P,Q), 
 \end{align}
 $$
 
@@ -115,11 +172,26 @@ because of the relation $\mathcal{B}\_{n+1} \subset \mathcal{B}\_{n}$. Let us se
 P = normalize(rand(3,3,3),1);
 n = 1
 P_1body, theta_1body, eta_1body = manybody_app(P, n, verbose=true);
-theta_1body
+display(theta_1body)
+# 3×3×3 Array{Float64, 3}:
+# [:, :, 1] =
+# 0.0       0.0318638  0.102341
+# 0.193926  0.0        0.0
+# 0.129174  0.0        0.0
+#
+# [:, :, 2] =
+# -0.545571  0.0  0.0
+#  0.0       0.0  0.0
+#  0.0       0.0  0.0
+#
+# [:, :, 3] =
+# 0.579689  0.0  0.0
+# 0.0       0.0  0.0
+# 0.0       0.0  0.0
 ```
 We can see that a lot of value in $\theta$ is 0. Tensor many-body approximation is performed by reducing some element in θ to be 0. 
 
-## many-body approximation
+## Many-body approximation
 
 We can freely model the interaction using the list of $D$ binary vectors `intracts`, where $D$ is the number of orders of the input tensor. The number of elements in the $n$-th binary vector is the combination of $n$ items taken $D$ at a time. We support $D=4$ below. The following is an example of a many-body approach where the active interaction is specified by `intracts`.
 
@@ -158,35 +230,55 @@ Legendre decomposition is a generalization of many-body approximation. The binar
 
 ## Tensor balancing
 
-We project a given tensor P to a manifold whose eta-parameter is constrained and then obtain a balanced tensor. If the tensor P is a matrix, this optimization is closely related to optimal transport. This library provides two functions `fiber_balancing` and `slice_balaincing`.
+We refer to balanced tensors as tensors whose slice/fiber sum is allinged. We project a given tensor P to a manifold $H$, which is the set of balanced tensors. 
 
-Without any option, `fiber_balaincing` provides 
+
+
+whose eta-parameter is constrained and then obtain a balanced tensor. If the tensor P is a matrix, this optimization is closely related to optimal transport. This library provides two functions `fiber_balancing` and `slice_balaincing`.
+
+Without any option, `fiber_balaincing` and `slice_balancing` assume each fiber/slice sum is 1. 
 ```julia
-T = normalize(rand(3,3,3),1);
-Ts, _ = fiber_balancing(T);
-sum(Ts,dims=1)[1,:,:]
+julia> T = normalize(rand(3,3,3),1);
+# Fiber balancing
+julia> Ts, _ = fiber_balancing(T);
+julia> sum(Ts,dims=1)[1,:,:]
 [[0.11 0.11 0.11]
  [0.11 0.11 0.11]
  [0.11 0.11 0.11]]
-sum(Ts,dims=2)[:,1,:]
+julia> sum(Ts,dims=2)[:,1,:]
 [[0.11 0.11 0.11]
  [0.11 0.11 0.11]
  [0.11 0.11 0.11]]
-sum(Ts,dims=3)[:,:,1]
+julia> sum(Ts,dims=3)[:,:,1]
 [[0.11 0.11 0.11]
  [0.11 0.11 0.11]
  [0.11 0.11 0.11]]
+
+# Slice balancing
+julia> Ts, _ = slice_balancing(T);
+julia> sum(Ts,dims=[2,3])[:]
+# [0.33 0.33 0.33]
+julia> sum(Ts,dims=[1,3])[:]
+# [0.33 0.33 0.33]
+julia> sum(Ts,dims=[1,2])[:]
+# [0.33 0.33 0.33]
 ```
 
 The obtained tensor Ts minimizes the inversed KL divergence from the given tensor onto tensor set
+The obtained tensor `X_nbody` is a globally optimal tensor that minimizes the KL divergence from given tensor $P$, that is,
+
+$$
+\begin{align}
+P^{\leq n} = \arg\min_{Q \in \mathcal{H}} D_{KL}(Q,P), 
+\end{align}
+$$
+
 
 # Complelixty
 
-This libary based on Naturla gradient method, which is a Newton method for non-Euclidian space. Hence, the complixty is cubic for the number of parameters to be optimized, which is not scalable and we admit our current version is not super convinent in the big-data age. We hope you will develop super scalable version of our framework in future.
+The optimization is based on the Natural gradient method, which is a Newton method for non-Euclidian space. Hence, the complexity is cubic for the number of parameters to be optimized, which is not scalable, and we admit our current version is not super convenient in the big-data age. We hope you will develop super scalable version of our framework in future.
 
 # Further readings
-
-A lot of work based on are devloping based on information
 
 - Convex Manifold Approximation for Tensors [[Theis]](https://ir.soken.ac.jp/records/6661)
 - How to choose interaction automatically? by J. Enouen [[arXiv]](https://arxiv.org/pdf/2410.11964) 
@@ -232,3 +324,5 @@ If you use this source code in a scientific publication, please consider citing 
 
 # Acknowledgement
 This work was supported by RIKEN, Special Postdoctoral Researcher Program.
+Special thanks to Yusei Yokoyama for his really helpful advice.
+Special thanks to Profir-Petru Pârțachi for my English colletions.
