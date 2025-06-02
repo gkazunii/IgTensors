@@ -1,4 +1,6 @@
 
+
+
 # What it is?
 
 This is a julia package for non-negative tensor methods based on information goemetry, which supports following papers:
@@ -68,7 +70,7 @@ Please refer to Equations (6), (7), (8), and (9) in [this paper](http://proceedi
 If all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0, the tensor is rank-1 tensor. Also, if the tensor is rank-1, then all values of `θ[2:end,:,:]`, `θ[:,2:end,:]`, `θ[:,:,2:end]` are 0. Thus, we can write the set of (non-negative normalized) rank-1 tensors as 
 
 $$
-B_1 = \{ P \mid \theta(P)\_{ijk} = 0 \ \ \text{if} \ \ ij \geq 2 \ \ \text{and} \ \ ik \geq 2 \ \ \text{and} \ \ jk \geq 2 \}
+B_1 = \set\{ P \mid \theta(P)\_{ijk} = 0 \ \ \text{if} \ \ ij \geq 2 \ \ \text{and} \ \ ik \geq 2 \ \ \text{and} \ \ jk \geq 2 \right\}
 $$
 
 Let us see that the random natural parameters of the rank-1 tensor satisfy the above condition.
