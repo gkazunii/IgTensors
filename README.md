@@ -369,4 +369,4 @@ If you use this source code in a scientific publication, please consider citing 
 # Acknowledgement
 This work was supported by RIKEN, Special Postdoctoral Researcher Program.
 Special thanks to Yusei Yokoyama for his really helpful advice.
-Special thanks to Profir-Petru Pârțachi for my English colletions.
+Special thanks to Profir-Petru Pârțachi for my English collections.
